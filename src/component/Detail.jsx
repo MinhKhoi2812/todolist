@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import {
   Dialog,
@@ -20,6 +20,8 @@ import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
 } from "@material-ui/pickers";
+
+import { connect } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   textField: {
@@ -74,8 +76,24 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Detail = (props) => {
-  const { handleCloseDialog, open } = props;
+  const { handleCloseDialog, open, todos } = props;
   const classes = useStyles();
+  const [item, setItem] = useState("");
+  const [description,setDescription] = useState("");
+  const [date, setDate] = useState();
+  const [priority,setPriority] = useState()
+
+  useEffect(() => {
+    if (todos.length !== 0) {
+      todos.forEach((todo) => {
+        setItem(todo.item);
+        setDescription(todo.description)
+        setDate(todo.date);
+        setPriority(todo.priority)
+      });
+    }
+  }, [todos]);
+
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <Dialog
@@ -89,15 +107,14 @@ const Detail = (props) => {
         <DialogContent>
           <TextField
             className={classes.textField}
-            label="Add New Task"
             variant="outlined"
-            // value={addValue}
             // onChange={(e) => handleChangeAddValue(e)}
+            defaultValue={item}
           />
           <Typography className={classes.description}>Description</Typography>
           <textarea
             // onChange={(e) => handleChangeDescription(e)}
-            // value={description}
+            value={description}
             className={classes.textFieldDes}
           ></textarea>
           <Box className={classes.layerMidle}>
@@ -109,7 +126,7 @@ const Detail = (props) => {
                 inputVariant="outlined"
                 className={classes.datepicker}
                 format="MM/dd/yyyy"
-                // value={date}
+                value={date}
                 // onChange={handleDateChange}
                 KeyboardButtonProps={{
                   "aria-label": "change date",
@@ -125,7 +142,7 @@ const Detail = (props) => {
                 <Select
                   labelId="demo-simple-select-autowidth-label"
                   id="demo-simple-select-autowidth"
-                  //   value={priority}
+                    value={priority}
                   //   onChange={handleChangePriority}
                   autoWidth
                   //   defaultValue={priority}
@@ -163,4 +180,10 @@ const Detail = (props) => {
   );
 };
 
-export default Detail;
+const mapStateToProps = (state) => {
+  return {
+    todos: state,
+  };
+};
+
+export default connect(mapStateToProps, null)(Detail);
