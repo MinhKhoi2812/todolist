@@ -22,6 +22,7 @@ import {
 } from "@material-ui/pickers";
 
 import { connect } from "react-redux";
+import { updateTodos } from "../redux/reducer";
 
 const useStyles = makeStyles((theme) => ({
   textField: {
@@ -76,23 +77,50 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Detail = (props) => {
-  const { handleCloseDialog, open, todos } = props;
+  const { handleCloseDialog, open, todos, updateTodos, editRow } = props;
   const classes = useStyles();
   const [item, setItem] = useState("");
-  const [description,setDescription] = useState("");
+  const [description, setDescription] = useState("");
   const [date, setDate] = useState();
-  const [priority,setPriority] = useState()
+  const [priority, setPriority] = useState();
+  const [id, setId] = useState();
+
+  const handleUpdate = (id, value, e) => {
+    updateTodos({
+      id: id,
+      item: item,
+      description: description,
+      date: date,
+      priority: priority,
+    });
+    handleCloseDialog();
+  };
 
   useEffect(() => {
-    if (todos.length !== 0) {
-      todos.forEach((todo) => {
-        setItem(todo.item);
-        setDescription(todo.description)
-        setDate(todo.date);
-        setPriority(todo.priority)
-      });
+    if (editRow) {
+      setId(editRow.id);
+      setItem(editRow.item);
+      setDescription(editRow.description);
+      setDate(editRow.date);
+      setPriority(editRow.priority);
     }
-  }, [todos]);
+  }, [editRow]);
+
+  const handleChangeItemValue = (e) => {
+    setItem(e.target.value);
+  };
+
+  const handleChangeDescriptionValue = (e) => {
+    setDescription(e.target.value);
+  };
+
+  const handleChangeDateValue = (date) => {
+    setDate(date);
+  };
+
+  const handleChangePriorityValue = (e) => {
+    setPriority(e.target.value);
+  };
 
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -108,15 +136,17 @@ const Detail = (props) => {
           <TextField
             className={classes.textField}
             variant="outlined"
-            // onChange={(e) => handleChangeAddValue(e)}
+            onChange={(e) => handleChangeItemValue(e)}
             defaultValue={item}
           />
           <Typography className={classes.description}>Description</Typography>
           <textarea
-            // onChange={(e) => handleChangeDescription(e)}
+            onChange={(e) => handleChangeDescriptionValue(e)}
             value={description}
             className={classes.textFieldDes}
-          ></textarea>
+          >
+            {description}
+          </textarea>
           <Box className={classes.layerMidle}>
             <Box className={classes.textLayer}>
               <Typography className={classes.textDueDate}>Due Date</Typography>
@@ -127,7 +157,7 @@ const Detail = (props) => {
                 className={classes.datepicker}
                 format="MM/dd/yyyy"
                 value={date}
-                // onChange={handleDateChange}
+                onChange={handleChangeDateValue}
                 KeyboardButtonProps={{
                   "aria-label": "change date",
                 }}
@@ -142,10 +172,9 @@ const Detail = (props) => {
                 <Select
                   labelId="demo-simple-select-autowidth-label"
                   id="demo-simple-select-autowidth"
-                    value={priority}
-                  //   onChange={handleChangePriority}
+                  value={priority}
+                  onChange={handleChangePriorityValue}
                   autoWidth
-                  //   defaultValue={priority}
                 >
                   <MenuItem value={10}>Low</MenuItem>
                   <MenuItem value={20}>Normal</MenuItem>
@@ -160,8 +189,7 @@ const Detail = (props) => {
             fullwidth="true"
             autoFocus
             type="submit"
-            //   onClick={handleCLickClose}
-            // onClick={handleSubmit}
+            onClick={(e) => handleUpdate(id, item, e)}
             style={{
               background: "#00cec9",
               marginBottom: "16px",
@@ -186,4 +214,10 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Detail);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    updateTodos: (obj) => dispatch(updateTodos(obj)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Detail);

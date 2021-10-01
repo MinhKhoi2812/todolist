@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { TextField, Box, Button } from "@material-ui/core";
 
 import TodoItem from "./TodoItem";
 import AddItem from "./AddItem";
+import { connect } from "react-redux";
+import { filterTodos } from "../redux/reducer";
 
 const useStyles = makeStyles((theme) => ({
   textTop: {
@@ -59,11 +61,29 @@ const useStyles = makeStyles((theme) => ({
       background: "#d63031!important",
     },
   },
+  completeBackground: {
+    display: "flex",
+    alignItems: "center",
+    border: "1px solid rgba(0, 0, 0, 0.23);",
+    width: "67ch",
+    margin: "auto",
+    padding: "5px",
+    marginBottom: theme.spacing(1),
+    background: "#b2bec3",
+    color: "#ffffff",
+  },
 }));
 
-const TodoList = () => {
+const TodoList = (props) => {
+  const { filterTodos } = props;
   const classes = useStyles();
   const [open, setOpen] = useState(false);
+  const [searchItem, setSearchItem] = useState("");
+
+  const handleChange = (e) => {
+    setSearchItem(e.target.value);
+    filterTodos({ item: searchItem });
+  };
 
   const handleCLickOpen = () => {
     setOpen(true);
@@ -84,6 +104,8 @@ const TodoList = () => {
         className={classes.textField}
         label="search"
         variant="outlined"
+        value={searchItem}
+        onChange={handleChange}
       />
 
       <TodoItem classes={classes} />
@@ -92,4 +114,16 @@ const TodoList = () => {
   );
 };
 
-export default TodoList;
+const mapStateToProps = (state) => {
+  return {
+    todos: state,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    filterTodos: (item) => dispatch(filterTodos(item)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TodoList);

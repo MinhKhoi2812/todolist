@@ -1,14 +1,23 @@
 import React, { useState } from "react";
 import { Checkbox, Button, Typography, Box } from "@material-ui/core";
 import { connect } from "react-redux";
-import { removeTodos } from "../redux/reducer";
+import { removeTodos, completeTodos } from "../redux/reducer";
 import Detail from "./Detail";
 
 const TodoItem = (props) => {
-  const { classes, todos, removeTodos } = props;
+  const { classes, todos, removeTodos, completeTodos,todo } = props;
   const [open, setOpen] = useState(false);
+  const [editRow, setEditRow] = useState();
+  const [checked, setChecked] = useState(false);
 
-  const handleOpenDialog = () => {
+  const handleChangeComplete = (item, e) => {
+    console.log(item, "item");
+    setChecked(e.target.checked);
+    return completeTodos(item.id);
+  };
+
+  const handleOpenDialog = (row) => {
+    setEditRow(() => row);
     setOpen(true);
   };
 
@@ -20,11 +29,22 @@ const TodoItem = (props) => {
     <>
       {todos.map((item) => {
         return (
-          <Box key={item.id} className={classes.todoItem}>
-            <Checkbox />
+          <Box
+            key={item.id}
+            className={
+              checked === true ? classes.completeBackground : classes.todoItem
+            }
+          >
+            <Checkbox
+              checked={checked}
+              onChange={(e) => handleChangeComplete(item, e)}
+            />
             <Typography className={classes.todoText}>{item.item}</Typography>
             <Box className={classes.button}>
-              <Button onClick={handleOpenDialog} className={classes.btnDetail}>
+              <Button
+                onClick={() => handleOpenDialog(item)}
+                className={classes.btnDetail}
+              >
                 Detail
               </Button>
               <Button
@@ -38,7 +58,11 @@ const TodoItem = (props) => {
         );
       })}
 
-      <Detail open={open} handleCloseDialog={handleCloseDialog} />
+      <Detail
+        editRow={editRow}
+        open={open}
+        handleCloseDialog={handleCloseDialog}
+      />
     </>
   );
 };
@@ -52,6 +76,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     removeTodos: (id) => dispatch(removeTodos(id)),
+    completeTodos: (id) => dispatch(completeTodos(id)),
   };
 };
 

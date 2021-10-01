@@ -82,8 +82,6 @@ function AddItem(props) {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState(20);
 
-  console.log("props", props);
-
   const handleDateChange = (date) => {
     setDate(date);
   };
